@@ -7,10 +7,10 @@
     status_code: [200, 304]
   become: yes
 
-- name: Verify {{ item.name }} is executable
+- name: Verify kubectl is executable
   shell: "kubectl version --client"
   register: result
 
 - fail:
-    msg: "{{ item.name }} not executable"
+    msg: "kubectl not executable"
   when: result.rc != 0
