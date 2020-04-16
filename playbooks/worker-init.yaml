@@ -15,7 +15,7 @@
         - name: "{{ inventory_hostname }}"
           kube_cfg_user: "system:node:{{ inventory_hostname }}"
 
-    - name: Copy certs and kubeconfig to worker
+    - name: Copy files to worker
       copy:
         src: "{{ WORK_DIR }}/{{ item }}"
         dest: "~/"
