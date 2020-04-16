@@ -4,23 +4,23 @@
   vars:
     task_dir: ../tasks
   tasks:
-  - include_tasks: "{{ task_dir }}/kubectl-install.yaml"
+    - include_tasks: "{{ task_dir }}/kubectl-install.yaml"
 
-  - name: Create temp directory
-    file:
-      name: "{{ WORK_DIR }}"
-      state: directory
+    - name: Create temp directory
+      file:
+        name: "{{ WORK_DIR }}"
+        state: directory
 
-  - include_tasks: "{{ task_dir }}/pki-install.yaml"
-    loop:
-    - {name: cfssl, cmd: version}
-    - {name: cfssljson, cmd: --version}
+    - include_tasks: "{{ task_dir }}/pki-install.yaml"
+      loop:
+        - {name: cfssl, cmd: version}
+        - {name: cfssljson, cmd: --version}
 
-  - include_tasks: "{{ task_dir }}/pki-provision.yaml"
+    - include_tasks: "{{ task_dir }}/pki-provision.yaml"
 
-  - include_tasks: "{{ task_dir }}/kubeconfig-generate.yaml"
-    loop:
-    - {name: kube-controller-manager, kube_cfg_user: "system:kube-controller-manager"}
-    - {name: kube-scheduler, kube_cfg_user: "system:kube-scheduler"}
-    - {name: admin, kube_cfg_user: "admin"}
+    - include_tasks: "{{ task_dir }}/kubeconfig-generate.yaml"
+      loop:
+        - {name: kube-controller-manager, kube_cfg_user: "system:kube-controller-manager"}
+        - {name: kube-scheduler, kube_cfg_user: "system:kube-scheduler"}
+        - {name: admin, kube_cfg_user: "admin"}
 

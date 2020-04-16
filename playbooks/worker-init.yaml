@@ -3,24 +3,24 @@
   vars:
     task_dir: "../tasks"
   tasks:
-  - include_tasks: "{{ task_dir }}/pki-generate-cert.yaml"
-    loop:
-    - name: "{{ inventory_hostname }}"
-      cn: "system:node:{{ inventory_hostname }}"
-      org: "system:nodes"
-      hostname: "{{ inventory_hostname + ',' + cluster_ip }}"
+    - include_tasks: "{{ task_dir }}/pki-generate-cert.yaml"
+      loop:
+        - name: "{{ inventory_hostname }}"
+          cn: "system:node:{{ inventory_hostname }}"
+          org: "system:nodes"
+          hostname: "{{ inventory_hostname + ',' + cluster_ip }}"
 
-  - include_tasks: "{{ task_dir }}/kubeconfig-generate.yaml"
-    loop:
-    - name: "{{ inventory_hostname }}"
-      kube_cfg_user: "system:node:{{ inventory_hostname }}"
+    - include_tasks: "{{ task_dir }}/kubeconfig-generate.yaml"
+      loop:
+        - name: "{{ inventory_hostname }}"
+          kube_cfg_user: "system:node:{{ inventory_hostname }}"
 
-  - name: Copy certs and kubeconfig to worker
-    copy:
-      src: "{{ WORK_DIR }}/{{ item }}"
-      dest: "~/"
-    loop:
-    - ca.pem
-    - "{{ inventory_hostname }}-key.pem"
-    - "{{ inventory_hostname }}.pem"
-    - "{{ inventory_hostname }}.kubeconfig"
+    - name: Copy certs and kubeconfig to worker
+      copy:
+        src: "{{ WORK_DIR }}/{{ item }}"
+        dest: "~/"
+      loop:
+        - ca.pem
+        - "{{ inventory_hostname }}-key.pem"
+        - "{{ inventory_hostname }}.pem"
+        - "{{ inventory_hostname }}.kubeconfig"

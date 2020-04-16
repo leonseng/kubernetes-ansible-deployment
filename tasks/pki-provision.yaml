@@ -38,8 +38,8 @@
 
 - include_tasks: pki-generate-cert.yaml
   loop:
-  - {name: admin, cn: admin, org: "system:masters"}
-  - {name: kube-controller-manager, cn: "system:kube-controller-manager", org: "system:kube-controller-manager"}
-  - {name: kube-scheduler, cn: "system:kube-scheduler", org: "system:kube-scheduler"}
-  - {name: kubernetes, cn: kubernetes, org: Kubernetes, hostname: "{{ k8s_hostnames }}"}
-  - {name: service-account, cn: "service-account", org: "Kubernetes"}
+    - {name: admin, cn: admin, org: "system:masters"}
+    - {name: kube-controller-manager, cn: "system:kube-controller-manager", org: "system:kube-controller-manager"}
+    - {name: kube-scheduler, cn: "system:kube-scheduler", org: "system:kube-scheduler"}
+    - {name: kubernetes, cn: kubernetes, org: Kubernetes, hostname: "{{ k8s_hostnames }}"}
+    - {name: service-account, cn: "service-account", org: "Kubernetes"}
