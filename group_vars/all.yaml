@@ -1,2 +1,4 @@
-WORK_DIR: .tmp
+ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
+WORK_DIR: "{{ lookup('env', 'PWD') }}/.tmp"
 API_SERVER_IP: 10.240.0.10  # using controller0

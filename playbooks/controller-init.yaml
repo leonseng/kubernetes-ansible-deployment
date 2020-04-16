@@ -1,7 +1,7 @@
 ---
 - hosts: controllers
   tasks:
-  - name: Copy certs to controller
+  - name: Copy certs and kubeconfigs to controller
     copy:
       src: "{{ WORK_DIR }}/{{ item }}"
       dest: "~/"
@@ -12,3 +12,6 @@
     - kubernetes.pem
     - service-account-key.pem
     - service-account.pem
+    - admin.kubeconfig
+    - kube-controller-manager.kubeconfig
+    - kube-scheduler.kubeconfig

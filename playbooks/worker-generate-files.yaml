@@ -1,0 +1,19 @@
+---
+- hosts: workers
+  connection: local
+  vars:
+    task_dir: "../tasks"
+  tasks:
+  - name: Generate kubelet certs on director for {{ inventory_hostname }}
+    include_tasks: "{{ task_dir }}/pki-generate-cert.yaml"
+    loop:
+    - name: "{{ inventory_hostname }}"
+      cn: "system:node:{{ inventory_hostname }}"
+      org: "system:nodes"
+      hostname: "{{ inventory_hostname + ',' + cluster_ip }}"
+
+  - name: Generate kubeconfig on director for {{ inventory_hostname }}
+    include_tasks: "{{ task_dir }}/kubeconfig-generate.yaml"
+    loop:
+    - name: "{{ inventory_hostname }}"
+      kube_cfg_user: "system:node:{{ inventory_hostname }}"

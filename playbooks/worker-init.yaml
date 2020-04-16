@@ -1,15 +1,9 @@
 ---
+- import_playbook: worker-generate-files.yaml
+
 - hosts: workers
   tasks:
-  - include_tasks: pki-generate-cert-generic.yaml
-    loop:
-    - name: "{{ inventory_hostname }}"
-      cn: "system:node:{{ inventory_hostname }}"
-      org: "system:nodes"
-      hostname: "{{ inventory_hostname + ',' + cluster_ip }}"
-    delegate_to: localhost
-
-  - name: Copy certs to worker
+  - name: Copy certs and kubeconfig to worker
     copy:
       src: "{{ WORK_DIR }}/{{ item }}"
       dest: "~/"
@@ -17,3 +11,4 @@
     - ca.pem
     - "{{ inventory_hostname }}-key.pem"
     - "{{ inventory_hostname }}.pem"
+    - "{{ inventory_hostname }}.kubeconfig"

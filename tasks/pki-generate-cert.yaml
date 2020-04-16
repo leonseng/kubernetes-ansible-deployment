@@ -1,4 +1,5 @@
 ---
+# todo: wrap in block and delegate to localhost
 - name: Set template variables for {{ item.name }}
   set_fact:
     cn: "{{ item.cn }}"
