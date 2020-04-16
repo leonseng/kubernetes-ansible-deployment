@@ -1,25 +1,28 @@
 ---
-# todo: wrap in block and delegate to localhost
-- name: Set template variables for {{ item.name }}
-  set_fact:
-    cn: "{{ item.cn }}"
-    org: "{{ item.org }}"
+- name: Generate certs for {{ item.name }} on director
+  block:
+  - name: Set template variables for {{ item.name }}
+    set_fact:
+      cn: "{{ item.cn }}"
+      org: "{{ item.org }}"
 
-- name: Create CSR for {{ item.name }}
-  template:
-    src: ../templates/csr.json.j2
-    dest: "{{ WORK_DIR }}/{{ item.name }}-csr.json"
+  - name: Create CSR for {{ item.name }}
+    template:
+      src: ../templates/csr.json.j2
+      dest: "{{ WORK_DIR }}/{{ item.name }}-csr.json"
 
-- name: Generate {{ item.name }} cert
-  shell:
-    cmd: |
-      cfssl gencert \
-      -ca=ca.pem \
-      -ca-key=ca-key.pem \
-      -config=ca-config.json \
-      {% if "hostname" in item %}
-      -hostname={{ item.hostname }} \
-      {% endif %}
-      -profile=kubernetes \
-      {{ item.name }}-csr.json | cfssljson -bare {{ item.name }}
-    chdir: "{{ WORK_DIR }}"
+  - name: Generate {{ item.name }} cert
+    shell:
+      cmd: |
+        cfssl gencert \
+        -ca=ca.pem \
+        -ca-key=ca-key.pem \
+        -config=ca-config.json \
+        {% if "hostname" in item %}
+        -hostname={{ item.hostname }} \
+        {% endif %}
+        -profile=kubernetes \
+        {{ item.name }}-csr.json | cfssljson -bare {{ item.name }}
+      chdir: "{{ WORK_DIR }}"
+
+  delegate_to: localhost
