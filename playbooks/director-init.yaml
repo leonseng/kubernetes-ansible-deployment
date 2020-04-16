@@ -1,0 +1,20 @@
+---
+- hosts: directors
+  connection: local
+  vars:
+    task_dir: ../tasks
+  tasks:
+  - include_tasks: "{{ task_dir }}/kubectl-install.yaml"
+
+  - name: Create temp directory
+    file:
+      name: "{{ WORK_DIR }}"
+      state: directory
+
+  - include_tasks: "{{ task_dir }}/pki-install.yaml"
+    loop:
+    - {name: cfssl, cmd: version}
+    - {name: cfssljson, cmd: --version}
+
+  - include_tasks: "{{ task_dir }}/pki-provision.yaml"
+

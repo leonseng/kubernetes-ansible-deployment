@@ -1,0 +1,19 @@
+---
+- hosts: workers
+  tasks:
+  - include_tasks: pki-generate-cert-generic.yaml
+    loop:
+    - name: "{{ inventory_hostname }}"
+      cn: "system:node:{{ inventory_hostname }}"
+      org: "system:nodes"
+      hostname: "{{ inventory_hostname + ',' + cluster_ip }}"
+    delegate_to: localhost
+
+  - name: Copy certs to worker
+    copy:
+      src: "{{ WORK_DIR }}/{{ item }}"
+      dest: "~/"
+    loop:
+    - ca.pem
+    - "{{ inventory_hostname }}-key.pem"
+    - "{{ inventory_hostname }}.pem"

@@ -1,0 +1,4 @@
+---
+- import_playbook: playbooks/director-init.yaml
+- import_playbook: playbooks/controller-init.yaml
+- import_playbook: playbooks/worker-init.yaml

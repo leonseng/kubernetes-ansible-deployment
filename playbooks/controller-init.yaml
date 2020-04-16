@@ -1,0 +1,14 @@
+---
+- hosts: controllers
+  tasks:
+  - name: Copy certs to controller
+    copy:
+      src: "{{ WORK_DIR }}/{{ item }}"
+      dest: "~/"
+    loop:
+    - ca.pem
+    - ca-key.pem
+    - kubernetes-key.pem
+    - kubernetes.pem
+    - service-account-key.pem
+    - service-account.pem

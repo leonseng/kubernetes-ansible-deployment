@@ -1,0 +1,19 @@
+all:
+  children:
+    directors:
+      hosts:
+        director:
+          cluster_ip: 10.240.0.2
+    controllers:
+      hosts:
+        controller0:
+          ansible_host: 10.240.0.10
+          cluster_ip: 10.240.0.10
+    workers:
+      hosts:
+        worker0:
+          ansible_host: 10.240.0.20
+          cluster_ip: 10.240.0.20
+        worker1:
+          ansible_host: 10.240.0.21
+          cluster_ip: 10.240.0.21

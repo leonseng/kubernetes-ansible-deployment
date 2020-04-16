@@ -1,0 +1,11 @@
+---
+- name: Get node variables for {{ worker }}
+  set_fact:
+    cluster_ip: "{{ hostvars[worker]['cluster_ip'] }}"
+
+- include_tasks: pki-generate-cert-generic.yaml
+  loop:
+  - name: "{{ worker }}"
+    cn: "system:node:{{ worker }}"
+    org: "system:nodes"
+    hostname: "{{ worker + ',' + cluster_ip }}"
