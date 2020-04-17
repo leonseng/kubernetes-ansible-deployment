@@ -1,10 +1,10 @@
 ---
 - hosts: controllers
   vars:
-    task_dir: "../tasks"
+    tasks_dir: "../tasks"
     files_dir: "../files"
   tasks:
-    - include_tasks: "{{ task_dir }}/etcd-install.yaml"
+    - include_tasks: "{{ tasks_dir }}/etcd-install.yaml"
 
     - name: Load certs and kubeconfigs
       block:
@@ -31,11 +31,11 @@
 
     - name: Copy kube-scheduler.yaml
       copy:
-        src: "../files/controller/kube-scheduler.yaml"
+        src: "{{ files_dir }}/controller/kube-scheduler.yaml"
         dest: "/etc/kubernetes/config/"
 
     - name: Setup controller services
-      include_tasks: "{{ task_dir }}/controller-service-install.yaml"
+      include_tasks: "{{ tasks_dir }}/controller-service-install.yaml"
       loop:
         - kube-apiserver
         - kube-scheduler
