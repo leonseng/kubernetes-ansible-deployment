@@ -34,3 +34,5 @@
         - kube-controller-manager.kubeconfig
         - kube-scheduler.kubeconfig
         - encryption-config.yaml
+
+    - include_tasks: "{{ task_dir }}/etcd-install.yaml"
