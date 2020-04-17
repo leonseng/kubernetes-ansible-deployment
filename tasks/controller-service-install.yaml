@@ -1,0 +1,22 @@
+---
+- name: Download {{ item.name }} binary
+  uri:
+    url: "{{ item.binary_url }}"
+    dest: /usr/local/bin/
+    mode: "755"
+    status_code: [200, 304]
+  become: yes
+
+- name: Create systemd unit for {{ item.name }}
+  copy:
+    src: "{{ WORK_DIR }}/{{ item.name }}.service"
+    dest: "/etc/systemd/system/{{ item.name }}.service"
+  become: yes
+
+- name: Start {{ item.name }} server
+  systemd:
+    name: "{{ item.name }}"
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  become: yes
