@@ -6,38 +6,35 @@
   tasks:
     - include_tasks: "{{ tasks_dir }}/etcd-install.yaml"
 
-    - name: Load certs and kubeconfigs
-      block:
-        - name: Create Kubernetes lib directory
-          file:
-            name: "/var/lib/kubernetes/"
-            state: directory
-
-        - name: Copy certs and kubeconfig files to controller
-          copy:
-            src: "{{ WORK_DIR }}/{{ item }}"
-            dest: "/var/lib/kubernetes/"
-          loop:
-            - ca.pem
-            - ca-key.pem
-            - kubernetes-key.pem
-            - kubernetes.pem
-            - service-account-key.pem
-            - service-account.pem
-            - kube-controller-manager.kubeconfig
-            - kube-scheduler.kubeconfig
-            - encryption-config.yaml
+    - name: Create Kubernetes directories
+      file:
+        name: "{{ item }}"
+        state: directory
+      loop:
+        - /var/lib/kubernetes/
+        - /etc/kubernetes/config/
       become: yes
 
-    - name: Copy kube-scheduler.yaml
+    - name: Copy certs, kubeconfigs, service configs to controller
       copy:
-        src: "{{ files_dir }}/controller/kube-scheduler.yaml"
-        dest: "/etc/kubernetes/config/"
+        src: "{{ WORK_DIR }}/{{ item.file_name }}"
+        dest: "{{ item.file_dest }}"
+      loop:
+        - {file_name: ca.pem, file_dest: /var/lib/kubernetes}
+        - {file_name: ca-key.pem, file_dest: /var/lib/kubernetes}
+        - {file_name: kubernetes-key.pem, file_dest: /var/lib/kubernetes}
+        - {file_name: kubernetes.pem, file_dest: /var/lib/kubernetes}
+        - {file_name: service-account-key.pem, file_dest: /var/lib/kubernetes}
+        - {file_name: service-account.pem, file_dest: /var/lib/kubernetes}
+        - {file_name: kube-controller-manager.kubeconfig, file_dest: /var/lib/kubernetes}
+        - {file_name: kube-scheduler.kubeconfig, file_dest: /var/lib/kubernetes}
+        - {file_name: kube-scheduler.yaml, file_dest: /etc/kubernetes/config}
+        - {file_name: encryption-config.yaml, file_dest: /var/lib/kubernetes}
+      become: yes
 
     - name: Setup controller services
       include_tasks: "{{ tasks_dir }}/controller-service-install.yaml"
       loop:
         - kube-apiserver
         - kube-scheduler
-
-
+        - kube-controller-manager
