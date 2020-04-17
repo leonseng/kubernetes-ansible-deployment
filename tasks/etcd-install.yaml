@@ -7,6 +7,12 @@
     dest: "{{ temp_dir }}/etcd-v3.4.0-linux-amd64.tar.gz"
     status_code: [200, 304]
 
+- name: Clean up past runs
+  shell:
+    cmd: rm -rf etcd-v3.4.0-linux-amd64
+    chdir: "{{ temp_dir }}"
+  become: yes
+
 - name: Extract etcd package
   unarchive:
     src: "{{ temp_dir }}/etcd-v3.4.0-linux-amd64.tar.gz"
