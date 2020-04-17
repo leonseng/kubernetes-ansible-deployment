@@ -61,7 +61,7 @@
 - name: Start etcd server
   systemd:
     name: etcd
-    state: started
+    state: restarted
     enabled: yes
     daemon_reload: yes
   become: yes

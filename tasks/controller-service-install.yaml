@@ -20,7 +20,6 @@
 - name: Start {{ service_name }} server
   systemd:
     name: "{{ service_name }}"
-    state: started
+    state: restarted
     enabled: yes
-    daemon_reload: yes
   become: yes
