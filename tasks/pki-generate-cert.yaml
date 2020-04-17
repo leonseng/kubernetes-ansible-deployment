@@ -10,8 +10,8 @@
         k8s_hostname: "kubernetes,kubernetes.default,kubernetes.default.svc,\
           kubernetes.default.svc.cluster,kubernetes.svc.cluster.local,\
           127.0.0.1,10.32.0.1\
-          {%- for w in groups['workers'] %}\
-          ,{{ hostvars[w]['cluster_ip'] }}\
+          {%- for n in groups['controllers'] %}\
+          ,{{ hostvars[n]['cluster_ip'] }}\
           {% endfor -%}"
       when: item.name == "kubernetes"
 
@@ -22,15 +22,15 @@
 
     - name: Generate {{ item.name }} cert
       shell:
-        cmd: |
-          cfssl gencert \
-          -ca=ca.pem \
-          -ca-key=ca-key.pem \
-          -config=ca-config.json \
+        cmd: >
+          cfssl gencert
+          -ca=ca.pem
+          -ca-key=ca-key.pem
+          -config=ca-config.json
           {% if k8s_hostname is defined %}
-          -hostname={{ k8s_hostname }} \
+          -hostname={{ k8s_hostname }}
           {% endif %}
-          -profile=kubernetes \
+          -profile=kubernetes 
           {{ item.name }}-csr.json | cfssljson -bare {{ item.name }}
         chdir: "{{ WORK_DIR }}"
 
