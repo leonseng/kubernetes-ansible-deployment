@@ -4,3 +4,11 @@
     task_dir: "../tasks"
   tasks:
     - include_tasks: "{{ task_dir }}/etcd-install.yaml"
+
+    - name: Create Kubernetes directories
+      file:
+        name: "/var/lib/kubernetes/"
+        state: directory
+      become: yes
+
+    - include_tasks: "{{ task_dir }}/kube-apiserver-install.yaml"

@@ -1,0 +1,24 @@
+---
+- name: Create systemd unit for kube-apiserver
+  template:
+    src: "../templates/kube-apiserver.service.j2"
+    dest: "/etc/systemd/system/kube-apiserver.service"
+  vars:
+    apiserver_count: "{{ groups['controllers'] | length }}"
+    service_cidr: "{{ SERVICE_CIDR }}"
+    etcd_servers_string: "{{
+      groups['controllers'] |
+      map('extract', hostvars , 'cluster_ip') |
+      map('regex_replace', '^(.+)$' , 'https://\\1:2379') |
+      list |
+      join(',')
+    }}"
+  become: yes
+
+- name: Start kube-apiserver server
+  systemd:
+    name: kube-apiserver
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  become: yes
