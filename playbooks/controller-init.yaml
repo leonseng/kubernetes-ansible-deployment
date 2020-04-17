@@ -1,6 +1,16 @@
 ---
 - hosts: controllers
+  vars:
+    task_dir: "../tasks"
   tasks:
+    - include_tasks: "{{ task_dir }}/kubeconfig-generate.yaml"
+      loop:
+        - {name: kube-controller-manager, kube_cfg_user: "system:kube-controller-manager"}
+        - {name: kube-scheduler, kube_cfg_user: "system:kube-scheduler"}
+        - {name: admin, kube_cfg_user: "admin"}
+
+    - include_tasks: "{{ task_dir }}/encryption-generate.yaml"
+
     - name: Copy files to controller
       copy:
         src: "{{ WORK_DIR }}/{{ item }}"
