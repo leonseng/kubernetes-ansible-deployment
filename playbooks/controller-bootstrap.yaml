@@ -5,10 +5,27 @@
   tasks:
     - include_tasks: "{{ task_dir }}/etcd-install.yaml"
 
-    - name: Create Kubernetes directories
-      file:
-        name: "/var/lib/kubernetes/"
-        state: directory
+    - name: Load certs and kubeconfigs
+      block:
+        - name: Create Kubernetes lib directory
+          file:
+            name: "/var/lib/kubernetes/"
+            state: directory
+
+        - name: Copy certs and kubeconfig files to controller
+          copy:
+            src: "{{ WORK_DIR }}/{{ item }}"
+            dest: "/var/lib/kubernetes/"
+          loop:
+            - ca.pem
+            - ca-key.pem
+            - kubernetes-key.pem
+            - kubernetes.pem
+            - service-account-key.pem
+            - service-account.pem
+            - kube-controller-manager.kubeconfig
+            - kube-scheduler.kubeconfig
+            - encryption-config.yaml
       become: yes
 
     - include_tasks: "{{ task_dir }}/kube-apiserver-install.yaml"

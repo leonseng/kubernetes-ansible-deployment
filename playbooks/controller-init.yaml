@@ -24,13 +24,4 @@
         src: "{{ WORK_DIR }}/{{ item }}"
         dest: "~/"
       loop:
-        - ca.pem
-        - ca-key.pem
-        - kubernetes-key.pem
-        - kubernetes.pem
-        - service-account-key.pem
-        - service-account.pem
         - admin.kubeconfig
-        - kube-controller-manager.kubeconfig
-        - kube-scheduler.kubeconfig
-        - encryption-config.yaml
