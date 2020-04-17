@@ -2,6 +2,7 @@
 - hosts: controllers
   vars:
     task_dir: "../tasks"
+    files_dir: "../files"
   tasks:
     - include_tasks: "{{ task_dir }}/pki-generate-cert.yaml"
       loop:
@@ -25,3 +26,30 @@
         dest: "~/"
       loop:
         - admin.kubeconfig
+
+    - name: Load config and service files into working directory
+      block:
+        - name: Load kube-scheduler files
+          copy:
+            src: "{{ files_dir }}/controller/{{ item }}"
+            dest: "{{ WORK_DIR }}/"
+          loop:
+            - kube-scheduler.yaml
+            - kube-scheduler.service
+
+        - name: Create systemd unit for kube-apiserver
+          template:
+            src: "../templates/kube-apiserver.service.j2"
+            dest: "{{ WORK_DIR }}/kube-apiserver.service"
+          vars:
+            apiserver_count: "{{ groups['controllers'] | length }}"
+            service_cidr: "{{ SERVICE_CIDR }}"
+            etcd_servers_string: "{{
+              groups['controllers'] |
+              map('extract', hostvars , 'cluster_ip') |
+              map('regex_replace', '(.+)' , 'https://\\1:2379') |
+              list |
+              join(',')
+            }}"
+
+      delegate_to: localhost

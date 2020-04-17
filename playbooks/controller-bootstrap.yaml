@@ -29,19 +29,6 @@
             - encryption-config.yaml
       become: yes
 
-    - include_tasks: "{{ task_dir }}/kube-apiserver-install.yaml"
-
-    - name: Load config and service files into working directory
-      block:
-        - name: Load kube-scheduler files
-          copy:
-            src: "{{ files_dir }}/controller/{{ item }}"
-            dest: "{{ WORK_DIR }}/"
-          loop:
-            - kube-scheduler.yaml
-            - kube-scheduler.service
-      delegate_to: localhost
-
     - name: Copy kube-scheduler.yaml
       copy:
         src: "../files/controller/kube-scheduler.yaml"
@@ -50,6 +37,7 @@
     - name: Setup controller services
       include_tasks: "{{ task_dir }}/controller-service-install.yaml"
       loop:
-        - name: kube-scheduler
-          binary_url: "{{ K8S_RELEASE_BASE_URL }}/kube-scheduler"
+        - kube-apiserver
+        - kube-scheduler
+
 
