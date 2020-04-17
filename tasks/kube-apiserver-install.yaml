@@ -9,7 +9,7 @@
     etcd_servers_string: "{{
       groups['controllers'] |
       map('extract', hostvars , 'cluster_ip') |
-      map('regex_replace', '^(.+)$' , 'https://\\1:2379') |
+      map('regex_replace', '(.+)' , 'https://\\1:2379') |
       list |
       join(',')
     }}"

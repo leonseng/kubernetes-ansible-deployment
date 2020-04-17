@@ -44,58 +44,19 @@
     - kubernetes.pem
   become: yes
 
-- name: Special block to create input string for etcd initial_cluster option
-  block:
-    - name: Initialize variables
-      set_fact:
-        j_query_list: []
-        etcd_cluster_string: ""
-
-    - name: Build JSON query for each controller's cluster IP
-      set_fact:
-        j_query_list: "{{ j_query_list + ['@.'+ controller + '.cluster_ip'] }}"
-      loop: "{{ groups['controllers'] }}"
-      loop_control:
-        loop_var: controller
-
-    - name: Append controller string to etcd_cluster_string
-      set_fact:
-        etcd_cluster_string: "{{ etcd_cluster_string + ',' + (hostvars | json_query(j_query_str)) }}"
-      loop: "{{ j_query_list }}"
-      loop_control:
-        loop_var: j_query_str
-
 - name: Create etcd systemd unit
-  block:
-    - name: Generate input string for etcd initial_cluster option
-      block:
-      - name: Initialize variables
-        set_fact:
-          j_query_list: []
-          etcd_cluster_string_list: []
-
-      - name: Build JSON query for each controller's cluster IP
-        set_fact:
-          j_query_list: "{{ j_query_list + ['@.'+ controller + '.cluster_ip'] }}"
-        loop: "{{ groups['controllers'] }}"
-        loop_control:
-          loop_var: controller
-
-      - name: Create etcd endpoint string for each controller
-        set_fact:
-          etcd_cluster_string_list: "{{ etcd_cluster_string_list + [inventory_hostname + '=https://' + (hostvars | json_query(j_query_str)) + ':2380'] }}"
-        loop: "{{ j_query_list }}"
-        loop_control:
-          loop_var: j_query_str
-
-      - set_fact:
-          etcd_cluster_string: "{{ etcd_cluster_string_list | join(',') }}"
-
-    - name: Create systemd unit for etcd
-      template:
-        src: "../templates/etcd.service.j2"
-        dest: "/etc/systemd/system/etcd.service"
-      become: yes
+  template:
+    src: "../templates/etcd.service.j2"
+    dest: "/etc/systemd/system/etcd.service"
+  vars:
+    etcd_cluster_string: "{{
+      groups['controllers'] |
+      map('extract', hostvars , 'cluster_ip') |
+      map('regex_replace', '(.+)' , 'https://\\1:2380') |
+      list |
+      join(',')
+    }}"
+  become: yes
 
 - name: Start etcd server
   systemd:
