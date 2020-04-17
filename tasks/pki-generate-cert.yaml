@@ -1,53 +1,37 @@
 ---
 - block:
-    - name: Check if {{ item.name }} certs already exist
-      stat:
-        path: "{{ WORK_DIR }}/{{ cert_file }}"
-      loop:
-        - "{{ item.name }}.pem"
-        - "{{ item.name }}-key.pem"
-      loop_control:
-        loop_var: cert_file
-      register: stat_results
+    - name: Set template variables for {{ item.name }}
+      set_fact:
+        cn: "{{ item.cn }}"
+        org: "{{ item.org }}"
 
-    - set_fact:
-        files_exist: "{{ stat_results.results | selectattr('stat.exists', 'equalto', false) | list }}"
+    - name: Initialize hostname variable for Kubernetes cert
+      set_fact:
+        k8s_hostname: "kubernetes,kubernetes.default,kubernetes.default.svc,\
+          kubernetes.default.svc.cluster,kubernetes.svc.cluster.local,\
+          127.0.0.1,10.32.0.1\
+          {%- for w in groups['workers'] %}\
+          ,{{ hostvars[w]['cluster_ip'] }}\
+          {% endfor -%}"
+      when: item.name == "kubernetes"
 
-    - block:
-        - name: Set template variables for {{ item.name }}
-          set_fact:
-            cn: "{{ item.cn }}"
-            org: "{{ item.org }}"
+    - name: Create CSR for {{ item.name }}
+      template:
+        src: ../templates/csr.json.j2
+        dest: "{{ WORK_DIR }}/{{ item.name }}-csr.json"
 
-        - name: Initialize hostname variable for Kubernetes cert
-          set_fact:
-            k8s_hostname: "kubernetes,kubernetes.default,kubernetes.default.svc,\
-              kubernetes.default.svc.cluster,kubernetes.svc.cluster.local,\
-              127.0.0.1,10.32.0.1\
-              {%- for w in groups['workers'] %}\
-              ,{{ hostvars[w]['cluster_ip'] }}\
-              {% endfor -%}"
-          when: item.name == "kubernetes"
-
-        - name: Create CSR for {{ item.name }}
-          template:
-            src: ../templates/csr.json.j2
-            dest: "{{ WORK_DIR }}/{{ item.name }}-csr.json"
-
-        - name: Generate {{ item.name }} cert
-          shell:
-            cmd: |
-              cfssl gencert \
-              -ca=ca.pem \
-              -ca-key=ca-key.pem \
-              -config=ca-config.json \
-              {% if k8s_hostname is defined %}
-              -hostname={{ k8s_hostname }} \
-              {% endif %}
-              -profile=kubernetes \
-              {{ item.name }}-csr.json | cfssljson -bare {{ item.name }}
-            chdir: "{{ WORK_DIR }}"
-
-      when: files_exist | length > 0
+    - name: Generate {{ item.name }} cert
+      shell:
+        cmd: |
+          cfssl gencert \
+          -ca=ca.pem \
+          -ca-key=ca-key.pem \
+          -config=ca-config.json \
+          {% if k8s_hostname is defined %}
+          -hostname={{ k8s_hostname }} \
+          {% endif %}
+          -profile=kubernetes \
+          {{ item.name }}-csr.json | cfssljson -bare {{ item.name }}
+        chdir: "{{ WORK_DIR }}"
 
   delegate_to: localhost

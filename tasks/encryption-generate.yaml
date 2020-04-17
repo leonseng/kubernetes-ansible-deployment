@@ -1,26 +1,15 @@
 ---
 - block:
+    - name: Generate encryption key
+      shell: head -c 32 /dev/urandom | base64
+      register: result
+
     - set_fact:
-        file_path: "{{ WORK_DIR }}/encryption-config.yaml"
+        encryption_key: "{{ result.stdout }}"
 
-    - name: Check if encryption-config.yaml already exists
-      stat:
-        path: "{{ file_path }}"
-      register: results
-
-    - block:
-        - name: Generate encryption key
-          shell: head -c 32 /dev/urandom | base64
-          register: result
-
-        - set_fact:
-            encryption_key: "{{ result.stdout }}"
-
-        - name: Generate encryption config file
-          template:
-            src: ../templates/encryption-config.yaml.j2
-            dest: "{{ file_path }}"
-
-      when: results.stat.exists == False
+    - name: Generate encryption config file
+      template:
+        src: ../templates/encryption-config.yaml.j2
+        dest: "{{ WORK_DIR }}/encryption-config.yaml"
 
   delegate_to: localhost
