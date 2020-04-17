@@ -1,0 +1,18 @@
+---
+- name: Copy CA config file
+  copy:
+    src: ../files/pki/
+    dest: "{{ WORK_DIR }}"
+
+- name: Create CA CSR file
+  template:
+    src: ../templates/csr.json.j2
+    dest: "{{ WORK_DIR }}/ca-csr.json"
+  vars:
+    cn: "Kubernetes"
+    org: "Kubernetes"
+
+- name: Provision CA
+  shell:
+    cmd: cfssl gencert -initca ca-csr.json | cfssljson -bare ca
+    chdir: "{{ WORK_DIR }}"

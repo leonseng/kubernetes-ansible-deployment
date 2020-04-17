@@ -1,28 +1,67 @@
 ---
-- name: Generate certs for {{ item.name }} on director
-  block:
-    - name: Set template variables for {{ item.name }}
-      set_fact:
-        cn: "{{ item.cn }}"
-        org: "{{ item.org }}"
+- block:
+    - name: Check if {{ item.name }} certs already exist
+      stat:
+        path: "{{ WORK_DIR }}/{{ cert_file }}"
+      loop:
+        - "{{ item.name }}.pem"
+        - "{{ item.name }}-key.pem"
+      loop_control:
+        loop_var: cert_file
+      register: stat_results
 
-    - name: Create CSR for {{ item.name }}
-      template:
-        src: ../templates/csr.json.j2
-        dest: "{{ WORK_DIR }}/{{ item.name }}-csr.json"
+    - set_fact:
+        files_exist: "{{ stat_results.results | selectattr('stat.exists', 'equalto', false) | list }}"
 
-    - name: Generate {{ item.name }} cert
-      shell:
-        cmd: |
-          cfssl gencert \
-          -ca=ca.pem \
-          -ca-key=ca-key.pem \
-          -config=ca-config.json \
-          {% if "hostname" in item %}
-          -hostname={{ item.hostname }} \
-          {% endif %}
-          -profile=kubernetes \
-          {{ item.name }}-csr.json | cfssljson -bare {{ item.name }}
-        chdir: "{{ WORK_DIR }}"
+    - block:
+        - name: Set template variables for {{ item.name }}
+          set_fact:
+            cn: "{{ item.cn }}"
+            org: "{{ item.org }}"
+
+        - name: Special block to create hostnames string for Kubernetes cert
+          block:
+            - name: Initialize hostname variable for Kubernetes cert
+              set_fact:
+                j_query_list: []
+                hostname: "kubernetes,kubernetes.default,kubernetes.default.svc,\
+                  kubernetes.default.svc.cluster,kubernetes.svc.cluster.local,\
+                  127.0.0.1,10.32.0.1"
+
+            - name: Build JSON query for each worker's cluster IP
+              set_fact:
+                j_query_list: "{{ j_query_list + ['@.'+ worker + '.cluster_ip'] }}"
+              loop: "{{ groups['workers'] }}"
+              loop_control:
+                loop_var: worker
+
+            - name: Append worker cluster IP to hostnames string
+              set_fact:
+                hostname: "{{ hostname + ',' + (hostvars | json_query(j_query_str)) }}"
+              loop: "{{ j_query_list }}"
+              loop_control:
+                loop_var: j_query_str
+
+          when: item.name == "kubernetes"
+
+        - name: Create CSR for {{ item.name }}
+          template:
+            src: ../templates/csr.json.j2
+            dest: "{{ WORK_DIR }}/{{ item.name }}-csr.json"
+
+        - name: Generate {{ item.name }} cert
+          shell:
+            cmd: |
+              cfssl gencert \
+              -ca=ca.pem \
+              -ca-key=ca-key.pem \
+              -config=ca-config.json \
+              {% if hostname is defined %}
+              -hostname={{ hostname }} \
+              {% endif %}
+              -profile=kubernetes \
+              {{ item.name }}-csr.json | cfssljson -bare {{ item.name }}
+            chdir: "{{ WORK_DIR }}"
+      when: files_exist | length > 0
 
   delegate_to: localhost

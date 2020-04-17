@@ -3,6 +3,14 @@
   vars:
     task_dir: "../tasks"
   tasks:
+    - include_tasks: "{{ task_dir }}/pki-generate-cert.yaml"
+      loop:
+        - {name: admin, cn: admin, org: "system:masters"}
+        - {name: kube-controller-manager, cn: "system:kube-controller-manager", org: "system:kube-controller-manager"}
+        - {name: kube-scheduler, cn: "system:kube-scheduler", org: "system:kube-scheduler"}
+        - {name: kubernetes, cn: kubernetes, org: "Kubernetes"}
+        - {name: service-account, cn: "service-account", org: "Kubernetes"}
+
     - include_tasks: "{{ task_dir }}/kubeconfig-generate.yaml"
       loop:
         - {name: kube-controller-manager, kube_cfg_user: "system:kube-controller-manager"}

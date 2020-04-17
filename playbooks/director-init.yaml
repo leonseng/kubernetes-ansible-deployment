@@ -16,5 +16,4 @@
         - {name: cfssl, cmd: version}
         - {name: cfssljson, cmd: --version}
 
-    - include_tasks: "{{ task_dir }}/pki-provision.yaml"
-
+    - include_tasks: "{{ task_dir }}/pki-generate-ca.yaml"

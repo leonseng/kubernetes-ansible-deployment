@@ -19,7 +19,7 @@
         - name: Generate encryption config file
           template:
             src: ../templates/encryption-config.yaml.j2
-            dest: "{{ WORK_DIR }}/encryption-config.yaml"
+            dest: "{{ file_path }}"
 
       when: results.stat.exists == False
 
