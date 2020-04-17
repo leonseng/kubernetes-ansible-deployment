@@ -1,21 +1,25 @@
 ---
-- name: Download {{ item.name }} binary
+- set_fact:
+    service_name: "{{ item }}"
+    service_binary_url: "{{ K8S_RELEASE_BASE_URL }}/{{ item }}"
+
+- name: Download {{ service_name }} binary
   uri:
-    url: "{{ item.binary_url }}"
+    url: "{{ service_binary_url }}"
     dest: /usr/local/bin/
     mode: "755"
     status_code: [200, 304]
   become: yes
 
-- name: Create systemd unit for {{ item.name }}
+- name: Create systemd unit for {{ service_name }}
   copy:
-    src: "{{ WORK_DIR }}/{{ item.name }}.service"
-    dest: "/etc/systemd/system/{{ item.name }}.service"
+    src: "{{ WORK_DIR }}/{{ service_name }}.service"
+    dest: "/etc/systemd/system/{{ service_name }}.service"
   become: yes
 
-- name: Start {{ item.name }} server
+- name: Start {{ service_name }} server
   systemd:
-    name: "{{ item.name }}"
+    name: "{{ service_name }}"
     state: started
     enabled: yes
     daemon_reload: yes
