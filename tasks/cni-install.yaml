@@ -1,0 +1,59 @@
+- set_fact:
+    temp_dir: /tmp
+
+- name: Download CNI plugins package
+  uri:
+    url: https://github.com/containernetworking/plugins/releases/download/v0.8.2/cni-plugins-linux-amd64-v0.8.2.tgz
+    dest: "{{ temp_dir }}/cni-plugins-linux-amd64-v0.8.2.tgz"
+    status_code: [200, 304]
+
+- name: Clean up past runs
+  file:
+    name: "/opt/cni/bin/"
+    state: absent
+  become: yes
+
+- name: Create CNI plugin directory
+  file:
+    name: "/opt/cni/bin/"
+    state: directory
+  become: yes
+
+- name: Extract CNI plugin package
+  unarchive:
+    src: "{{ temp_dir }}/cni-plugins-linux-amd64-v0.8.2.tgz"
+    dest: "/opt/cni/bin/"
+    remote_src: yes
+  become: yes
+
+- name: Copy crictl binary to executable path
+  copy:
+    src: "{{ temp_dir }}/crictl"
+    dest: /usr/local/bin/
+    mode: +x
+    remote_src: yes
+  become: yes
+
+# Configure CNI networking
+- name: Create CNI conf directory
+  file:
+    name: "/etc/cni/net.d/"
+    state: directory
+  become: yes
+
+- name: Create the bridge network configuration file
+  template:
+    src: ../templates/10-bridge.conf.j2
+    dest: /etc/cni/net.d/10-bridge.conf
+  become: yes
+
+- name: Create the loopback network configuration file
+  copy:
+    content: |
+      {
+          "cniVersion": "0.3.1",
+          "name": "lo",
+          "type": "loopback"
+      }
+    dest: /etc/cni/net.d/99-loopback.conf
+  become: yes

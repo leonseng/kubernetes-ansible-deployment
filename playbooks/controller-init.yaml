@@ -20,13 +20,6 @@
 
     - include_tasks: "{{ tasks_dir }}/encryption-generate.yaml"
 
-    - name: Copy files to controller
-      copy:
-        src: "{{ WORK_DIR }}/{{ item }}"
-        dest: "~/"
-      loop:
-        - admin.kubeconfig
-
     - name: Load config and service files into working directory
       block:
         - name: Load kube-scheduler files

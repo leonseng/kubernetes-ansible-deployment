@@ -1,6 +1,7 @@
 ---
-- import_playbook: playbooks/director-init.yaml
-- import_playbook: playbooks/controller-init.yaml
+# - import_playbook: playbooks/director-init.yaml
+# - import_playbook: playbooks/controller-init.yaml
 - import_playbook: playbooks/worker-init.yaml
 
-- import_playbook: playbooks/controller-bootstrap.yaml
+# - import_playbook: playbooks/controller-bootstrap.yaml
+- import_playbook: playbooks/worker-bootstrap.yaml

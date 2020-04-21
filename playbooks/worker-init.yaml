@@ -14,13 +14,4 @@
       loop:
         - name: "{{ inventory_hostname }}"
           kube_cfg_user: "system:node:{{ inventory_hostname }}"
-
-    - name: Copy files to worker
-      copy:
-        src: "{{ WORK_DIR }}/{{ item }}"
-        dest: "~/"
-      loop:
-        - ca.pem
-        - "{{ inventory_hostname }}-key.pem"
-        - "{{ inventory_hostname }}.pem"
-        - "{{ inventory_hostname }}.kubeconfig"
+          server_ip: "{{ API_SERVER_IP }}"

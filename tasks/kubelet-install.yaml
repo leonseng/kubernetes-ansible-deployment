@@ -1,0 +1,80 @@
+- include_tasks: "{{ tasks_dir }}/worker-disable-swap.yaml"
+
+- set_fact:
+    temp_dir: /tmp
+
+- name: Download kubelet package
+  uri:
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.15.3/bin/linux/amd64/kubelet
+    dest: "{{ temp_dir }}/kubelet"
+    status_code: [200, 304]
+
+- name: Copy kubelet binary to executable path
+  copy:
+    src: "{{ temp_dir }}/kubelet"
+    dest: /usr/local/bin/
+    mode: +x
+    remote_src: yes
+  become: yes
+
+- name: Create Kubernetes directories
+  file:
+    name: "{{ item }}"
+    state: directory
+  loop:
+    - /var/lib/kubelet
+    - /var/lib/kubernetes
+    - /var/run/kubernetes
+  become: yes
+
+- name: Copy certs and config to worker
+  copy:
+    src: "{{ WORK_DIR }}/{{ item.file_name }}"
+    dest: "{{ item.file_dest }}"
+  loop:
+    - {file_name: ca.pem, file_dest: /var/lib/kubernetes/}
+    - {file_name: "{{ inventory_hostname }}-key.pem", file_dest: /var/lib/kubelet/}
+    - {file_name: "{{ inventory_hostname }}.pem", file_dest: /var/lib/kubelet/}
+    - {file_name: "{{ inventory_hostname }}.kubeconfig", file_dest: /var/lib/kubelet/kubeconfig}
+  become: yes
+
+- name: Create the kubelet-config.yaml configuration file
+  template:
+    src: "../templates/kubelet-config.yaml.j2"
+    dest: /var/lib/kubelet/kubelet-config.yaml
+  become: yes
+
+- name: Create the kubelet systemd unit
+  copy:
+    content: |
+      [Unit]
+      Description=Kubernetes Kubelet
+      Documentation=https://github.com/kubernetes/kubernetes
+      After=containerd.service
+      Requires=containerd.service
+
+      [Service]
+      ExecStart=/usr/local/bin/kubelet \
+        --config=/var/lib/kubelet/kubelet-config.yaml \
+        --container-runtime=remote \
+        --container-runtime-endpoint=unix:///var/run/containerd/containerd.sock \
+        --image-pull-progress-deadline=2m \
+        --kubeconfig=/var/lib/kubelet/kubeconfig \
+        --network-plugin=cni \
+        --register-node=true \
+        --v=2
+      Restart=on-failure
+      RestartSec=5
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: /etc/systemd/system/kubelet.service
+  become: yes
+
+- name: Start kubelet service
+  systemd:
+    name: kubelet
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  become: yes

@@ -21,5 +21,6 @@
   systemd:
     name: "{{ service_name }}"
     state: restarted
+    daemon_reload: yes
     enabled: yes
   become: yes
