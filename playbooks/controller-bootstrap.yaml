@@ -6,6 +6,8 @@
   tasks:
     - include_tasks: "{{ tasks_dir }}/etcd-install.yaml"
 
+    - include_tasks: "{{ tasks_dir }}/kubectl-install.yaml"
+
     - name: Create Kubernetes directories
       file:
         name: "{{ item }}"
