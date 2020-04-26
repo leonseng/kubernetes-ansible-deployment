@@ -18,19 +18,3 @@
 
     - include_tasks: "{{ tasks_dir }}/kubectl-install.yaml"
 
-    - name: Configure kubectl for remote access
-      shell:
-        cmd: "kubectl config {{ item }}"
-        chdir: "{{ WORK_DIR }}"
-      loop:
-        - "set-cluster kubernetes-the-hard-way
-          --certificate-authority=ca.pem
-          --embed-certs=true
-          --server=https://{{ API_SERVER_IP }}:6443"
-        - "set-credentials admin
-          --client-certificate=admin.pem
-          --client-key=admin-key.pem"
-        - "set-context kubernetes-the-hard-way
-          --cluster=kubernetes-the-hard-way
-          --user=admin"
-        - use-context kubernetes-the-hard-way

@@ -5,3 +5,4 @@
 
 - import_playbook: playbooks/controller-bootstrap.yaml
 - import_playbook: playbooks/worker-bootstrap.yaml
+- import_playbook: playbooks/configure-cluster.yaml
