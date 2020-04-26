@@ -3,6 +3,6 @@ ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
 WORK_DIR: "{{ lookup('env', 'PWD') }}/.tmp"
 API_SERVER_IP: 10.240.0.10  # using controller0
 SERVICE_CIDR: "10.32.0.0/24"
-POD_CIDR: "10.200.0.0/16"
+CLUSTER_CIDR: "10.200.0.0/16"
 
 K8S_RELEASE_BASE_URL: https://storage.googleapis.com/kubernetes-release/release/v1.15.3/bin/linux/amd64

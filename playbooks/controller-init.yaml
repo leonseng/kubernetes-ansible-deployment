@@ -51,6 +51,6 @@
             dest: "{{ WORK_DIR }}/kube-controller-manager.service"
           vars:
             service_cidr: "{{ SERVICE_CIDR }}"
-            pod_cidr: "{{ POD_CIDR }}"
+            cluster_cidr: "{{ CLUSTER_CIDR }}"
 
       delegate_to: localhost
