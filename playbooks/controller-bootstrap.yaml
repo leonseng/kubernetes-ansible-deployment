@@ -41,9 +41,6 @@
         - kube-scheduler
         - kube-controller-manager
 
-
-
-
     - name: Configure RBAC for Kubelet Authorization
       block:
         - set_fact:

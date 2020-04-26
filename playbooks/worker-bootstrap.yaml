@@ -21,7 +21,3 @@
     - include_tasks: "{{ tasks_dir }}/cni-install.yaml"
 
     - include_tasks: "{{ tasks_dir }}/kubelet-install.yaml"
-
-
-
-
