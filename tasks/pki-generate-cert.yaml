@@ -5,16 +5,6 @@
         cn: "{{ item.cn }}"
         org: "{{ item.org }}"
 
-    - name: Initialize hostname variable for Kubernetes cert
-      set_fact:
-        k8s_hostname: "kubernetes,kubernetes.default,kubernetes.default.svc,\
-          kubernetes.default.svc.cluster,kubernetes.svc.cluster.local,\
-          127.0.0.1,10.32.0.1\
-          {%- for n in groups['controllers'] %}\
-          ,{{ hostvars[n]['cluster_ip'] }}\
-          {% endfor -%}"
-      when: item.name == "kubernetes"
-
     - name: Create CSR for {{ item.name }}
       template:
         src: ../templates/csr.json.j2
@@ -27,10 +17,10 @@
           -ca=ca.pem
           -ca-key=ca-key.pem
           -config=ca-config.json
-          {% if k8s_hostname is defined %}
-          -hostname={{ k8s_hostname }}
+          {% if item.hostname is defined %}
+          -hostname={{ item.hostname }}
           {% endif %}
-          -profile=kubernetes 
+          -profile=kubernetes
           {{ item.name }}-csr.json | cfssljson -bare {{ item.name }}
         chdir: "{{ WORK_DIR }}"
 

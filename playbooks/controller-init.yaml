@@ -9,7 +9,15 @@
         - {name: admin, cn: admin, org: "system:masters"}
         - {name: kube-controller-manager, cn: "system:kube-controller-manager", org: "system:kube-controller-manager"}
         - {name: kube-scheduler, cn: "system:kube-scheduler", org: "system:kube-scheduler"}
-        - {name: kubernetes, cn: kubernetes, org: "Kubernetes"}
+        - {
+            name: kubernetes, cn: kubernetes, org: "Kubernetes",
+            hostname: "kubernetes,kubernetes.default,kubernetes.default.svc,\
+              kubernetes.default.svc.cluster,kubernetes.svc.cluster.local,\
+              127.0.0.1,10.32.0.1\
+              {%- for n in groups['controllers'] %}\
+              ,{{ hostvars[n]['cluster_ip'] }}\
+              {% endfor -%}"
+          }
         - {name: service-account, cn: "service-account", org: "Kubernetes"}
 
     - include_tasks: "{{ tasks_dir }}/kubeconfig-generate.yaml"
