@@ -62,6 +62,7 @@
         --kubeconfig=/var/lib/kubelet/kubeconfig \
         --network-plugin=cni \
         --register-node=true \
+        --node-ip={{ cluster_ip }} \
         --v=2
       Restart=on-failure
       RestartSec=5
