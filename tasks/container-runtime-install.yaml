@@ -98,6 +98,9 @@
       ExecStartPre=/sbin/modprobe overlay
       ExecStart=/bin/containerd
       Restart=always
+      {%- if http_proxy is defined %}
+      Environment="HTTP_PROXY={{ http_proxy }}"
+      {%- endif %}
       RestartSec=5
       Delegate=yes
       KillMode=process
