@@ -1,6 +1,6 @@
 # Kubernetes (on virtual machines) The Hard Way - Deployment
 
-Ansible playbook to deploy a local Kubernetes cluster based on [Kubernetes (on virtual machines) The Hard Way](https://github.com/leonseng/Kubernetes-on-virtual-machines-The-Hard-Way).
+Vagrant + Ansible to deploy a local Kubernetes cluster based on [Kubernetes (on virtual machines) The Hard Way](https://github.com/leonseng/Kubernetes-on-virtual-machines-The-Hard-Way).
 
 ## Getting Started
 
