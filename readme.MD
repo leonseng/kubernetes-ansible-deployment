@@ -22,3 +22,9 @@ Run `vagrant up`. That's it!
 ### Access cluster
 
 The director VM contains the `kubectl` command to operate the cluster. To access the director VM, run `vagrant ssh director`.
+
+## Todo
+- Use loops in `Vagrantfile` and attempt to dynamically generate the inventory files
+- Verify `kube-router` pods are ready before deploying `core-dns`
+- Verify `core-dns` pods are ready before finishing the deployment playbook
+- Simplify/merge playbooks in `k8s/playbooks`
