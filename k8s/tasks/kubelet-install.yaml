@@ -1,5 +1,11 @@
 - include_tasks: "{{ tasks_dir }}/worker-disable-swap.yaml"
 
+- name: Wait for connectivity to external site to be restored
+  wait_for:
+    host: storage.googleapis.com
+    port: 443
+    delay: 5
+
 - set_fact:
     temp_dir: /tmp
 
