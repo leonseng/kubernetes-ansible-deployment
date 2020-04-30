@@ -1,4 +1,11 @@
 ---
+- hosts: director
+  tasks:
+    - name: Copy SSH config
+      copy:
+        src: files/.ssh/config
+        dest: ~/.ssh/config
+
 - hosts: all
   tasks:
     - name: Configure hosts file
