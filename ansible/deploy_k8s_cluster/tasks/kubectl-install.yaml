@@ -1,0 +1,16 @@
+---
+- name: Download kubectl
+  uri:
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.15.3/bin/linux/amd64/kubectl
+    dest: /usr/local/bin/
+    mode: "755"
+    status_code: [200, 304]
+  become: yes
+
+- name: Verify kubectl is executable
+  shell: "kubectl version --client"
+  register: result
+
+- fail:
+    msg: "kubectl not executable"
+  when: result.rc != 0

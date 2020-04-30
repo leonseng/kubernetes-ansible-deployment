@@ -1,0 +1,17 @@
+---
+- hosts: workers
+  vars:
+    tasks_dir: "../tasks"
+  tasks:
+    - include_tasks: "{{ tasks_dir }}/pki-generate-cert.yaml"
+      loop:
+        - name: "{{ inventory_hostname }}"
+          cn: "system:node:{{ inventory_hostname }}"
+          org: "system:nodes"
+          hostname: "{{ inventory_hostname + ',' + cluster_ip }}"
+
+    - include_tasks: "{{ tasks_dir }}/kubeconfig-generate.yaml"
+      loop:
+        - name: "{{ inventory_hostname }}"
+          kube_cfg_user: "system:node:{{ inventory_hostname }}"
+          server_ip: "{{ API_SERVER_IP }}"

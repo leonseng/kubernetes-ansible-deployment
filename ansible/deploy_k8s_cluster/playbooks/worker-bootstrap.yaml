@@ -1,0 +1,23 @@
+---
+- hosts: workers
+  vars:
+    tasks_dir: "../tasks"
+  tasks:
+    - name: Install dependencies
+      apt:
+        update_cache: yes
+        name: "{{ item }}"
+        state: present
+      loop:
+        - socat
+        - conntrack
+        - ipset
+      become: yes
+
+    - include_tasks: "{{ tasks_dir }}/kubectl-install.yaml"
+
+    - include_tasks: "{{ tasks_dir }}/container-runtime-install.yaml"
+
+    - include_tasks: "{{ tasks_dir }}/cni-install.yaml"
+
+    - include_tasks: "{{ tasks_dir }}/kubelet-install.yaml"

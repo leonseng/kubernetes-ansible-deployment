@@ -48,13 +48,13 @@ Vagrant.configure("2") do |config|
     b.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/worker1.id_rsa"
 
     b.vm.provision "ansible_local" do |ansible|
-      ansible.provisioning_path = "/vagrant/ansible_local"
+      ansible.provisioning_path = "/vagrant/ansible/provision_vms"
       ansible.playbook = "director.yaml"
       ansible.verbose = true
       ansible.limit = "all"
       ansible.inventory_path = "inventory.ini"
     end
 
-    b.vm.provision "shell", inline: "cd /vagrant/k8s && ansible-playbook -i inventory.yaml playbook.yaml", privileged: false
+    b.vm.provision "shell", inline: "cd /vagrant/ansible/deploy_k8s_cluster && ansible-playbook -i inventory.yaml playbook.yaml", privileged: false
   end
 end
