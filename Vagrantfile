@@ -1,6 +1,6 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "debian/buster64"
-  
+
   config.vm.define "controller0" do |b|
     b.vm.provider "virtualbox" do |v|
       v.name = "k8s-controller0"
@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
     b.vm.network "private_network", ip: "10.240.0.10", virtualbox__intnet: "k8s-cluster"
     b.vm.hostname = "controller0"
   end
-  
+
   config.vm.define "worker0" do |b|
     b.vm.provider "virtualbox" do |v|
       v.name = "k8s-worker0"
@@ -20,7 +20,7 @@ Vagrant.configure("2") do |config|
     b.vm.network "private_network", ip: "10.240.0.20", virtualbox__intnet: "k8s-cluster"
     b.vm.hostname = "worker0"
   end
-  
+
   config.vm.define "worker1" do |b|
     b.vm.provider "virtualbox" do |v|
       v.name = "k8s-worker1"
@@ -29,8 +29,8 @@ Vagrant.configure("2") do |config|
     end
     b.vm.network "private_network", ip: "10.240.0.21", virtualbox__intnet: "k8s-cluster"
     b.vm.hostname = "worker1"
-  end    
-  
+  end
+
   config.vm.define "director", primary: true do |b|
     b.vm.provider "virtualbox" do |v|
       v.name = "k8s-director"
@@ -39,7 +39,7 @@ Vagrant.configure("2") do |config|
     end
     b.vm.network "private_network", ip: "10.240.0.2", virtualbox__intnet: "k8s-cluster"
     b.vm.hostname = "director"
-    
+
     b.vm.provision "file", source: ".vagrant//machines//controller0//virtualbox//private_key", destination: "/home/vagrant/.ssh/controller0.id_rsa"
     b.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/controller0.id_rsa"
     b.vm.provision "file", source: ".vagrant//machines//worker0//virtualbox//private_key", destination: "/home/vagrant/.ssh/worker0.id_rsa"
@@ -54,5 +54,7 @@ Vagrant.configure("2") do |config|
       ansible.limit = "all"
       ansible.inventory_path = "inventory.ini"
     end
+
+    b.vm.provision "shell", inline: "cd /vagrant/k8s && ansible-playbook -i inventory.yaml playbook.yaml", privileged: false
   end
 end

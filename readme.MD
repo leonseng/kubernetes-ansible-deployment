@@ -17,20 +17,8 @@ The following software are required for this deployment:
 
 ### Create VMs
 
-Run `vagrant up`.
+Run `vagrant up`. That's it!
 
-### Create cluster
+### Access cluster
 
-1. SSH to the director VM by running `vagrant ssh director`
-1. Navigate into the `/vagrant/k8s` directory
-1. To create a standard cluster, run
-
-    ```
-    ansible-playbook -i inventory.yaml playbook.yaml
-    ```
-
-    To configure HTTP proxy for containerd on the workers, run
-
-    ```
-    ansible-playbook -i inventory.yaml playbook.yaml --extra-vars "http_proxy=http://proxy:123"
-    ```
+The director VM contains the `kubectl` command to operate the cluster. To access the director VM, run `vagrant ssh director`.
