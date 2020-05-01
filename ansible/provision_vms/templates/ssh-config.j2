@@ -1,0 +1,6 @@
+{% for node in groups['controllers'] + groups['workers'] %}
+Host {{ node }}
+  HostName {{ hostvars[node].cluster_ip }}
+  IdentityFile ~/.ssh/{{ node }}.id_rsa
+  IdentitiesOnly yes
+{% endfor %}
