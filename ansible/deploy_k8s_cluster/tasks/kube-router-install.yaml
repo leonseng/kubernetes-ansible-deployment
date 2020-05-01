@@ -18,3 +18,10 @@
 
 - name: Deploy Kube Router
   shell: kubectl apply -f {{ temp_dir }}/generic-kuberouter-all-features.yaml
+
+- name: Verify Kube Router daemons are running
+  shell: kubectl get ds kube-router -n kube-system -o jsonpath='{.status.numberReady}'
+  register: result
+  until: (groups['workers'] | length) == (result.stdout | int)
+  retries: 6
+  delay: 5

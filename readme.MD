@@ -25,6 +25,5 @@ The director VM contains the `kubectl` command to operate the cluster. To access
 
 ## Todo
 - Use loops in `Vagrantfile` and attempt to dynamically generate the inventory files
-- Verify `kube-router` pods are ready before deploying `core-dns`
 - Verify `core-dns` pods are ready before finishing the deployment playbook
 - Simplify/merge playbooks in `k8s/playbooks`
