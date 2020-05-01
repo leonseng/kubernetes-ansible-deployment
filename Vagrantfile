@@ -52,7 +52,7 @@ Vagrant.configure("2") do |config|
       ansible.playbook = "director.yaml"
       ansible.verbose = true
       ansible.limit = "all"
-      ansible.inventory_path = "inventory.ini"
+      ansible.inventory_path = "inventory.yaml"
     end
 
     b.vm.provision "shell", inline: "cd /vagrant/ansible/deploy_k8s_cluster && ansible-playbook -i inventory.yaml playbook.yaml", privileged: false

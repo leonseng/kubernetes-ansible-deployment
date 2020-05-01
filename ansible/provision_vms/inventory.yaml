@@ -1,0 +1,19 @@
+all:
+  children:
+    directors:
+      hosts:
+        director:
+          ansible_connection: local
+          cluster_ip: 10.240.0.2
+    controllers:
+      hosts:
+        controller0:
+          cluster_ip: 10.240.0.10
+    workers:
+      hosts:
+        worker0:
+          cluster_ip: 10.240.0.20
+          pod_cidr: 10.200.0.0/24
+        worker1:
+          cluster_ip: 10.240.0.21
+          pod_cidr: 10.200.1.0/24

@@ -12,7 +12,7 @@
       lineinfile:
         dest: /etc/hosts
         regexp: '.*{{ item }}$'
-        line: "{{ hostvars[item].ansible_host }} {{item}}"
+        line: "{{ hostvars[item].cluster_ip }} {{item}}"
         state: present
       when: inventory_hostname != item
       loop: "{{ groups.all }}"
