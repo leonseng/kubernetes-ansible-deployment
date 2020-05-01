@@ -1,1 +1,2 @@
 .vagrant/
+ansible/deploy_k8s_cluster/inventory.yaml
