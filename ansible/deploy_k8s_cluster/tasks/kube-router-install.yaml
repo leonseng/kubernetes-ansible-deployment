@@ -23,5 +23,5 @@
   shell: kubectl get ds kube-router -n kube-system -o jsonpath='{.status.numberReady}'
   register: result
   until: (groups['workers'] | length) == (result.stdout | int)
-  retries: 6
+  retries: 20
   delay: 5

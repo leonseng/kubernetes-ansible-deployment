@@ -6,5 +6,5 @@
   shell: kubectl get deployment coredns -n kube-system -o jsonpath='{.status.readyReplicas}'
   register: result
   until: (groups['workers'] | length) == (result.stdout | int)
-  retries: 6
+  retries: 20
   delay: 5
