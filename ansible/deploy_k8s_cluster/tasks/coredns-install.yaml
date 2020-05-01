@@ -1,0 +1,10 @@
+---
+- name: Deploy DNS cluster add-on
+  shell: kubectl apply -f https://storage.googleapis.com/kubernetes-the-hard-way/coredns.yaml
+
+- name: Verify CoreDNS pods are running
+  shell: kubectl get deployment coredns -n kube-system -o jsonpath='{.status.readyReplicas}'
+  register: result
+  until: (groups['workers'] | length) == (result.stdout | int)
+  retries: 6
+  delay: 5

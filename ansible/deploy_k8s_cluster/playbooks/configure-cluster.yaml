@@ -21,5 +21,4 @@
 
     - include_tasks: ../tasks/kube-router-install.yaml
 
-    - name: Deploy DNS cluster add-on
-      shell: kubectl apply -f https://storage.googleapis.com/kubernetes-the-hard-way/coredns.yaml
+    - include_tasks: ../tasks/coredns-install.yaml
