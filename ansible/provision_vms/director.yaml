@@ -6,6 +6,11 @@
         src: templates/ssh-config.j2
         dest: ~/.ssh/config
 
+    - name: Copy Ansible inventory
+      template:
+        src: inventory.yaml
+        dest: /vagrant/ansible/deploy_k8s_cluster/inventory.yaml
+
 - hosts: all
   tasks:
     - name: Configure hosts file
