@@ -26,14 +26,6 @@
     remote_src: yes
   become: yes
 
-- name: Copy crictl binary to executable path
-  copy:
-    src: "{{ temp_dir }}/crictl"
-    dest: /usr/local/bin/
-    mode: +x
-    remote_src: yes
-  become: yes
-
 # Configure CNI networking
 - name: Create CNI conf directory
   file:
