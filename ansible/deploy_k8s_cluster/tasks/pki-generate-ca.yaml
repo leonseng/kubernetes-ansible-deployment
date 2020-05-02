@@ -1,8 +1,21 @@
 ---
-- name: Copy CA config file
+- name: Create CA config file
   copy:
-    src: ../files/pki/
-    dest: "{{ WORK_DIR }}"
+    content: |
+      {
+        "signing": {
+          "default": {
+            "expiry": "8760h"
+          },
+          "profiles": {
+            "kubernetes": {
+              "usages": ["signing", "key encipherment", "server auth", "client auth"],
+              "expiry": "8760h"
+            }
+          }
+        }
+      }
+    dest: "{{ WORK_DIR }}/ca-config.json"
 
 - name: Create CA CSR file
   template:
