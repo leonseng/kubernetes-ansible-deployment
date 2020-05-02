@@ -14,7 +14,7 @@
     replace: "{{ item.replace }}"
   loop:
     - {search: "%APISERVER%", replace: "https://{{ API_SERVER_IP }}:6443"}
-    - {search: "%CLUSTERCIDR%", replace: "{{ CLUSTER_CIDR }}"}
+    - {search: "%CLUSTERCIDR%", replace: "{{ CLUSTER_POD_CIDRS }}"}
 
 - name: Deploy Kube Router
   shell: kubectl apply -f {{ temp_dir }}/generic-kuberouter-all-features.yaml

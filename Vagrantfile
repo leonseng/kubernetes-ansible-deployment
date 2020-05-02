@@ -1,6 +1,11 @@
 Vagrant.configure("2") do |config|
+
+  # User configurable settings
   CONTROLLER_COUNT = (ENV["CONTROLLER_COUNT"] || 1).to_i
   WORKER_COUNT = (ENV["WORKER_COUNT"] || 2).to_i
+  API_SERVER_IP = (ENV["API_SERVER_IP"] || "10.240.0.10")
+  SERVICE_CIDR = (ENV["SERVICE_CIDR"] || "10.32.0.0/24")
+  CLUSTER_POD_CIDRS = (ENV["CLUSTER_POD_CIDRS"] || "10.200.0.0/16")
 
   host_vars = {
     "director" => {
@@ -69,6 +74,11 @@ Vagrant.configure("2") do |config|
         "directors" => ["director"],
         "controllers" => (0..CONTROLLER_COUNT-1).to_a.map {|n| "controller#{n}"}.compact,
         "workers" => (0..WORKER_COUNT-1).to_a.map {|n| "worker#{n}"}.compact,
+        "all:vars" => {
+          "API_SERVER_IP" => API_SERVER_IP,
+          "SERVICE_CIDR" => SERVICE_CIDR,
+          "CLUSTER_POD_CIDRS" => CLUSTER_POD_CIDRS,
+        }
       }
       ansible.host_vars = host_vars
     end
