@@ -24,4 +24,4 @@
   register: result
   until: (groups['workers'] | length) == (result.stdout | int)
   retries: 20
-  delay: 5
+  delay: 10
