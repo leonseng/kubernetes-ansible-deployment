@@ -6,6 +6,7 @@ Vagrant.configure("2") do |config|
   API_SERVER_IP = (ENV["API_SERVER_IP"] || "10.240.0.10")
   SERVICE_CIDR = (ENV["SERVICE_CIDR"] || "10.32.0.0/24")
   CLUSTER_POD_CIDRS = (ENV["CLUSTER_POD_CIDRS"] || "10.200.0.0/16")
+  NODE_CIDR_MASK_LEN = (ENV["NODE_CIDR_MASK_LEN"] || 24).to_i
 
   host_vars = {
     "director" => {
@@ -78,6 +79,7 @@ Vagrant.configure("2") do |config|
           "API_SERVER_IP" => API_SERVER_IP,
           "SERVICE_CIDR" => SERVICE_CIDR,
           "CLUSTER_POD_CIDRS" => CLUSTER_POD_CIDRS,
+          "NODE_CIDR_MASK_LEN" => NODE_CIDR_MASK_LEN
         }
       }
       ansible.host_vars = host_vars

@@ -60,5 +60,6 @@
           vars:
             service_cidr: "{{ SERVICE_CIDR }}"
             cluster_cidr: "{{ CLUSTER_POD_CIDRS }}"
+            node_cidr_mask_length: "{{ NODE_CIDR_MASK_LEN }}"
 
       delegate_to: localhost
