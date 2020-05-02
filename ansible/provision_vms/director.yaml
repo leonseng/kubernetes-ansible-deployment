@@ -8,8 +8,8 @@
 
     - name: Copy Ansible inventory
       template:
-        src: inventory.yaml
-        dest: /vagrant/ansible/deploy_k8s_cluster/inventory.yaml
+        src: /tmp/vagrant-ansible/inventory/vagrant_ansible_local_inventory
+        dest: /vagrant/ansible/deploy_k8s_cluster/inventory.ini
 
 - hosts: all
   tasks:
