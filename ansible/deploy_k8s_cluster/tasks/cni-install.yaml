@@ -33,12 +33,6 @@
     state: directory
   become: yes
 
-- name: Create the bridge network configuration file
-  template:
-    src: ../templates/10-bridge.conf.j2
-    dest: /etc/cni/net.d/10-bridge.conf
-  become: yes
-
 - name: Create the loopback network configuration file
   copy:
     content: |

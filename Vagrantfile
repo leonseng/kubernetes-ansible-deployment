@@ -28,7 +28,7 @@ Vagrant.configure("2") do |config|
 
   (0..WORKER_COUNT-1).each do |i|
     hostname = "worker#{i}"
-    host_vars = host_vars.merge(Hash[hostname, {"cluster_ip" => "10.240.0.#{20+i}", "pod_cidr" => "10.200.#{i}.0/24"}])
+    host_vars = host_vars.merge(Hash[hostname, {"cluster_ip" => "10.240.0.#{20+i}"}])
 
     config.vm.define "#{hostname}" do |b|
       b.vm.provider "virtualbox" do |v|
