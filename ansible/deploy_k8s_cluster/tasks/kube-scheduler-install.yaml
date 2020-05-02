@@ -1,0 +1,31 @@
+---
+- block:
+    - name: Copy configs to controller
+      copy:
+        src: "{{ item.file_src }}"
+        dest: "{{ item.file_dest }}"
+      loop:
+        - file_src: "{{ WORK_DIR }}/kube-scheduler.kubeconfig"
+          file_dest: /var/lib/kubernetes
+        - file_src: ../files/controller/kube-scheduler.yaml
+          file_dest: /etc/kubernetes/config
+
+    - name: Download kube-scheduler binary
+      uri:
+        url: "{{ K8S_RELEASE_BASE_URL }}/kube-scheduler"
+        dest: /usr/local/bin/
+        mode: "755"
+        status_code: [200, 304]
+
+    - name: Create systemd unit for kube-scheduler
+      copy:
+        src: "../files/controller/kube-scheduler.service"
+        dest: "/etc/systemd/system/"
+
+    - name: Start kube-scheduler server
+      systemd:
+        name: "kube-scheduler"
+        state: restarted
+        daemon_reload: yes
+        enabled: yes
+  become: yes

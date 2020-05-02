@@ -9,12 +9,44 @@
         name: "{{ WORK_DIR }}"
         state: directory
 
-    - include_tasks: "{{ tasks_dir }}/pki-install.yaml"
+    - include_tasks: "{{ tasks_dir }}/kubectl-install.yaml"
+
+    - name: Install CFSSL
+      uri:
+        url: https://storage.googleapis.com/kubernetes-the-hard-way/cfssl/linux/{{ item }}
+        dest: /usr/local/bin/
+        mode: "755"
+        status_code: [200, 304]
+      become: yes
       loop:
-        - {name: cfssl, cmd: version}
-        - {name: cfssljson, cmd: --version}
+        - cfssl
+        - cfssljson
 
     - include_tasks: "{{ tasks_dir }}/pki-generate-ca.yaml"
 
-    - include_tasks: "{{ tasks_dir }}/kubectl-install.yaml"
+    - name: Create common certs and configs
+      block:
+        - include_tasks: "{{ tasks_dir }}/pki-generate-cert.yaml"
+          vars:
+            name: "{{ item.name }}"
+            cn: "{{ item.cn }}"
+            org: "{{ item.org }}"
+            hostname: "{{ item.hostname | default(omit) }}"
+          loop:
+            - name: admin
+              cn: admin
+              org: "system:masters"
+            - name: kubernetes
+              cn: kubernetes
+              org: "Kubernetes"
+              hostname: "kubernetes,kubernetes.default,kubernetes.default.svc,\
+                kubernetes.default.svc.cluster,kubernetes.svc.cluster.local,\
+                127.0.0.1,10.32.0.1\
+                {%- for n in groups['controllers'] %}\
+                ,{{ hostvars[n]['cluster_ip'] }}\
+                {% endfor -%}"
 
+        - include_tasks: "{{ tasks_dir }}/kubeconfig-generate.yaml"
+          vars:
+            name: admin
+            kube_cfg_user: admin

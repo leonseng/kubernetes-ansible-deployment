@@ -1,27 +1,27 @@
 ---
 - block:
-    - name: Set template variables for {{ item.name }}
+    - name: Set template variables for {{ name }}
       set_fact:
-        cn: "{{ item.cn }}"
-        org: "{{ item.org }}"
+        cn: "{{ cn }}"
+        org: "{{ org }}"
 
-    - name: Create CSR for {{ item.name }}
+    - name: Create CSR for {{ name }}
       template:
         src: ../templates/csr.json.j2
-        dest: "{{ WORK_DIR }}/{{ item.name }}-csr.json"
+        dest: "{{ WORK_DIR }}/{{ name }}-csr.json"
 
-    - name: Generate {{ item.name }} cert
+    - name: Generate {{ name }} cert
       shell:
         cmd: >
           cfssl gencert
           -ca=ca.pem
           -ca-key=ca-key.pem
           -config=ca-config.json
-          {% if item.hostname is defined %}
-          -hostname={{ item.hostname }}
+          {% if hostname is defined %}
+          -hostname={{ hostname }}
           {% endif %}
           -profile=kubernetes
-          {{ item.name }}-csr.json | cfssljson -bare {{ item.name }}
+          {{ name }}-csr.json | cfssljson -bare {{ name }}
         chdir: "{{ WORK_DIR }}"
 
   delegate_to: localhost

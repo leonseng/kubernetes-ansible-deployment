@@ -2,11 +2,15 @@
 - hosts: controllers
   vars:
     tasks_dir: "../tasks"
-    files_dir: "../files"
   tasks:
-    - include_tasks: "{{ tasks_dir }}/etcd-install.yaml"
+    - name: Create temp directory
+      file:
+        name: "{{ WORK_DIR }}"
+        state: directory
 
     - include_tasks: "{{ tasks_dir }}/kubectl-install.yaml"
+
+    - include_tasks: "{{ tasks_dir }}/etcd-install.yaml"
 
     - name: Create Kubernetes directories
       file:
@@ -17,39 +21,69 @@
         - /etc/kubernetes/config/
       become: yes
 
-    - name: Copy certs, kubeconfigs, service configs to controller
+    - name: Copy CA certs to controller
       copy:
-        src: "{{ WORK_DIR }}/{{ item.file_name }}"
-        dest: "{{ item.file_dest }}"
+        src: "{{ WORK_DIR }}/{{ item }}"
+        dest: "/var/lib/kubernetes"
       loop:
-        - {file_name: ca.pem, file_dest: /var/lib/kubernetes}
-        - {file_name: ca-key.pem, file_dest: /var/lib/kubernetes}
-        - {file_name: kubernetes-key.pem, file_dest: /var/lib/kubernetes}
-        - {file_name: kubernetes.pem, file_dest: /var/lib/kubernetes}
-        - {file_name: service-account-key.pem, file_dest: /var/lib/kubernetes}
-        - {file_name: service-account.pem, file_dest: /var/lib/kubernetes}
-        - {file_name: kube-controller-manager.kubeconfig, file_dest: /var/lib/kubernetes}
-        - {file_name: kube-scheduler.kubeconfig, file_dest: /var/lib/kubernetes}
-        - {file_name: kube-scheduler.yaml, file_dest: /etc/kubernetes/config}
-        - {file_name: encryption-config.yaml, file_dest: /var/lib/kubernetes}
+        - ca.pem
+        - ca-key.pem
       become: yes
 
-    - name: Setup controller services
-      include_tasks: "{{ tasks_dir }}/controller-service-install.yaml"
-      loop:
-        - kube-apiserver
-        - kube-scheduler
-        - kube-controller-manager
+    - name: Install kube-apiserver
+      block:
+        - block:
+            - include_tasks: "{{ tasks_dir }}/encryption-generate.yaml"
+
+          run_once: yes
+
+        - include_tasks: "{{ tasks_dir }}/kube-apiserver-install.yaml"
+
+    - name: Install kube-scheduler
+      block:
+        - name: Prepare files
+          block:
+            - include_tasks: "{{ tasks_dir }}/pki-generate-cert.yaml"
+              vars:
+                name: kube-scheduler
+                cn: "system:kube-scheduler"
+                org: "system:kube-scheduler"
+
+            - include_tasks: "{{ tasks_dir }}/kubeconfig-generate.yaml"
+              vars:
+                name: kube-scheduler
+                kube_cfg_user: "system:kube-scheduler"
+          run_once: yes
+
+        - include_tasks: "{{ tasks_dir }}/kube-scheduler-install.yaml"
+
+    - name: Install kube-controller-manager
+      block:
+        - name: Prepare files
+          block:
+            - include_tasks: "{{ tasks_dir }}/pki-generate-cert.yaml"
+              vars:
+                name: "{{ item.name }}"
+                cn: "{{ item.cn }}"
+                org: "{{ item.org }}"
+              loop:
+                - {name: kube-controller-manager, cn: "system:kube-controller-manager", org: "system:kube-controller-manager"}
+                - {name: service-account, cn: "service-account", org: "Kubernetes"}
+
+            - include_tasks: "{{ tasks_dir }}/kubeconfig-generate.yaml"
+              vars:
+                name: kube-controller-manager
+                kube_cfg_user: "system:kube-controller-manager"
+          run_once: yes
+
+        - include_tasks: "{{ tasks_dir }}/kube-controller-manager-install.yaml"
 
     - name: Configure RBAC for Kubelet Authorization
       block:
-        - set_fact:
-            temp_dir: "/tmp"
-
-        - name: Copy files to controller
+        - name: Copy admin.kubeconfig to controller
           copy:
             src: "{{ WORK_DIR }}/admin.kubeconfig"
-            dest: "~/"
+            dest: "{{ WORK_DIR }}/"
 
         - name: Create ClusterRole manifest
           copy:
@@ -73,7 +107,7 @@
                     - nodes/metrics
                   verbs:
                     - "*"
-            dest: "{{ temp_dir }}/kube-apiserver-to-kubelet-cluster-role.yaml"
+            dest: "{{ WORK_DIR }}/kube-apiserver-to-kubelet-cluster-role.yaml"
 
         - name: Create ClusterRoleBinding manifest
           copy:
@@ -91,16 +125,16 @@
                 - apiGroup: rbac.authorization.k8s.io
                   kind: User
                   name: kubernetes
-            dest: "{{ temp_dir }}/kube-apiserver-cluster-role-binding.yaml"
+            dest: "{{ WORK_DIR }}/kube-apiserver-cluster-role-binding.yaml"
 
         - name: Create ClusterRole to access the Kubelet API
           shell:
-            cmd: kubectl apply --kubeconfig ~/admin.kubeconfig -f kube-apiserver-to-kubelet-cluster-role.yaml
-            chdir: "{{ temp_dir }}"
+            cmd: kubectl apply --kubeconfig admin.kubeconfig -f kube-apiserver-to-kubelet-cluster-role.yaml
+            chdir: "{{ WORK_DIR }}"
 
         - name: Bind the ClusterRole to the kubernetes user
           shell:
-            cmd: kubectl apply --kubeconfig ~/admin.kubeconfig -f kube-apiserver-cluster-role-binding.yaml
-            chdir: "{{ temp_dir }}"
+            cmd: kubectl apply --kubeconfig admin.kubeconfig -f kube-apiserver-cluster-role-binding.yaml
+            chdir: "{{ WORK_DIR }}"
 
       run_once: true

@@ -1,10 +1,8 @@
-- set_fact:
-    temp_dir: /tmp
-
+---
 - name: Download CNI plugins package
   uri:
     url: https://github.com/containernetworking/plugins/releases/download/v0.8.2/cni-plugins-linux-amd64-v0.8.2.tgz
-    dest: "{{ temp_dir }}/cni-plugins-linux-amd64-v0.8.2.tgz"
+    dest: "{{ WORK_DIR }}/cni-plugins-linux-amd64-v0.8.2.tgz"
     status_code: [200, 304]
 
 - name: Clean up past runs
@@ -21,7 +19,7 @@
 
 - name: Extract CNI plugin package
   unarchive:
-    src: "{{ temp_dir }}/cni-plugins-linux-amd64-v0.8.2.tgz"
+    src: "{{ WORK_DIR }}/cni-plugins-linux-amd64-v0.8.2.tgz"
     dest: "/opt/cni/bin/"
     remote_src: yes
   become: yes

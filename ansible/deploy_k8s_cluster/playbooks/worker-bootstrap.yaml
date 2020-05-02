@@ -3,6 +3,11 @@
   vars:
     tasks_dir: "../tasks"
   tasks:
+    - name: Create temp directory
+      file:
+        name: "{{ WORK_DIR }}"
+        state: directory
+
     - name: Install dependencies
       apt:
         update_cache: yes

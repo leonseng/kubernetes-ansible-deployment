@@ -1,28 +1,26 @@
-- set_fact:
-    temp_dir: /tmp
-
+---
 # crictl
 - name: Download crictl package
   uri:
     url: https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.15.0/crictl-v1.15.0-linux-amd64.tar.gz
-    dest: "{{ temp_dir }}/crictl-v1.15.0-linux-amd64.tar.gz"
+    dest: "{{ WORK_DIR }}/crictl-v1.15.0-linux-amd64.tar.gz"
     status_code: [200, 304]
 
 - name: Clean up past runs
   file:
-    name: "{{ temp_dir }}/crictl-v1.15.0-linux-amd64"
+    name: "{{ WORK_DIR }}/crictl-v1.15.0-linux-amd64"
     state: absent
   become: yes
 
 - name: Extract crictl package
   unarchive:
-    src: "{{ temp_dir }}/crictl-v1.15.0-linux-amd64.tar.gz"
-    dest: "{{ temp_dir }}/"
+    src: "{{ WORK_DIR }}/crictl-v1.15.0-linux-amd64.tar.gz"
+    dest: "{{ WORK_DIR }}/"
     remote_src: yes
 
 - name: Copy crictl binary to executable path
   copy:
-    src: "{{ temp_dir }}/crictl"
+    src: "{{ WORK_DIR }}/crictl"
     dest: /usr/local/bin/
     mode: +x
     remote_src: yes
@@ -32,12 +30,12 @@
 - name: Download runc package
   uri:
     url: https://github.com/opencontainers/runc/releases/download/v1.0.0-rc8/runc.amd64
-    dest: "{{ temp_dir }}/runc.amd64"
+    dest: "{{ WORK_DIR }}/runc.amd64"
     status_code: [200, 304]
 
 - name: Copy runc binary to executable path
   copy:
-    src: "{{ temp_dir }}/runc.amd64"
+    src: "{{ WORK_DIR }}/runc.amd64"
     dest: /usr/local/bin/runc
     mode: +x
     remote_src: yes
@@ -46,25 +44,25 @@
 # containerd
 - name: Create containerd directory
   file:
-    name: "{{ temp_dir }}/containerd"
+    name: "{{ WORK_DIR }}/containerd"
     state: directory
 
 - name: Download containerd package
   uri:
     url: https://github.com/containerd/containerd/releases/download/v1.2.9/containerd-1.2.9.linux-amd64.tar.gz
-    dest: "{{ temp_dir }}/containerd-1.2.9.linux-amd64.tar.gz"
+    dest: "{{ WORK_DIR }}/containerd-1.2.9.linux-amd64.tar.gz"
     status_code: [200, 304]
 
 - name: Extract containerd package
   unarchive:
-    src: "{{ temp_dir }}/containerd-1.2.9.linux-amd64.tar.gz"
-    dest: "{{ temp_dir }}/containerd"
+    src: "{{ WORK_DIR }}/containerd-1.2.9.linux-amd64.tar.gz"
+    dest: "{{ WORK_DIR }}/containerd"
     remote_src: yes
 
 - name: Copy containerd binary to executable path
   shell:
     cmd: mv containerd/bin/* /bin/
-    chdir: "{{ temp_dir }}"
+    chdir: "{{ WORK_DIR }}"
   become: yes
 
 - name: Create containerd config dir

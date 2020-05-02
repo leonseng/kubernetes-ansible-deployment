@@ -24,5 +24,4 @@ Run `vagrant up`. That's it!
 The director VM contains the `kubectl` command to operate the cluster. To access the director VM, run `vagrant ssh director`.
 
 ## Todo
-- Use loops in `Vagrantfile` and attempt to dynamically generate the inventory files
-- Simplify/merge playbooks in `k8s/playbooks`
+- Setup API loadbalancer using HAProxy with Keepalived

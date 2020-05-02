@@ -1,0 +1,32 @@
+---
+- block:
+    - name: Copy kubeconfig to controller
+      copy:
+        src: "{{ WORK_DIR }}/{{ item }}"
+        dest: "/var/lib/kubernetes"
+      loop:
+        - kube-controller-manager.kubeconfig
+
+    - name: Download kube-controller-manager binary
+      uri:
+        url: "{{ K8S_RELEASE_BASE_URL }}/kube-controller-manager"
+        dest: /usr/local/bin/
+        mode: "755"
+        status_code: [200, 304]
+
+    - name: Create systemd unit for kube-controller-manager
+      template:
+        src: "../templates/kube-controller-manager.service.j2"
+        dest: "/etc/systemd/system/kube-controller-manager.service"
+      vars:
+        service_cidr: "{{ SERVICE_CIDR }}"
+        cluster_cidr: "{{ CLUSTER_POD_CIDRS }}"
+        node_cidr_mask_length: "{{ NODE_CIDR_MASK_LEN }}"
+
+    - name: Start kube-controller-manager server
+      systemd:
+        name: "kube-controller-manager"
+        state: restarted
+        daemon_reload: yes
+        enabled: yes
+  become: yes

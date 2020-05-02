@@ -6,18 +6,15 @@
     port: 443
     delay: 5
 
-- set_fact:
-    temp_dir: /tmp
-
 - name: Download kubelet package
   uri:
     url: https://storage.googleapis.com/kubernetes-release/release/v1.15.3/bin/linux/amd64/kubelet
-    dest: "{{ temp_dir }}/kubelet"
+    dest: "{{ WORK_DIR }}/kubelet"
     status_code: [200, 304]
 
 - name: Copy kubelet binary to executable path
   copy:
-    src: "{{ temp_dir }}/kubelet"
+    src: "{{ WORK_DIR }}/kubelet"
     dest: /usr/local/bin/
     mode: +x
     remote_src: yes
@@ -32,6 +29,19 @@
     - /var/lib/kubernetes
     - /var/run/kubernetes
   become: yes
+
+- include_tasks: "{{ tasks_dir }}/pki-generate-cert.yaml"
+  vars:
+    name: "{{ inventory_hostname }}"
+    cn: "system:node:{{ inventory_hostname }}"
+    org: "system:nodes"
+    hostname: "{{ inventory_hostname + ',' + cluster_ip }}"
+
+- include_tasks: "{{ tasks_dir }}/kubeconfig-generate.yaml"
+  vars:
+    name: "{{ inventory_hostname }}"
+    kube_cfg_user: "system:node:{{ inventory_hostname }}"
+    server_ip: "{{ API_SERVER_IP }}"
 
 - name: Copy certs and config to worker
   copy:

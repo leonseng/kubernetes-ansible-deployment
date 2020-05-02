@@ -1,15 +1,13 @@
-- set_fact:
-    temp_dir: /tmp
-
+---
 - name: Download Kube Router manifest template
   uri:
     url: https://raw.githubusercontent.com/cloudnativelabs/kube-router/master/daemonset/generic-kuberouter-all-features.yaml
-    dest: "{{ temp_dir }}/generic-kuberouter-all-features.yaml"
+    dest: "{{ WORK_DIR }}/generic-kuberouter-all-features.yaml"
     status_code: [200, 304]
 
 - name: Create Kube Router manifest for this deployment
   replace:
-    path: "{{ temp_dir }}/generic-kuberouter-all-features.yaml"
+    path: "{{ WORK_DIR }}/generic-kuberouter-all-features.yaml"
     regexp: "{{ item.search }}"
     replace: "{{ item.replace }}"
   loop:
@@ -17,7 +15,7 @@
     - {search: "%CLUSTERCIDR%", replace: "{{ CLUSTER_POD_CIDRS }}"}
 
 - name: Deploy Kube Router
-  shell: kubectl apply -f {{ temp_dir }}/generic-kuberouter-all-features.yaml
+  shell: kubectl apply -f {{ WORK_DIR }}/generic-kuberouter-all-features.yaml
 
 - name: Verify Kube Router daemons are running
   shell: kubectl get ds kube-router -n kube-system -o jsonpath='{.status.numberReady}'
