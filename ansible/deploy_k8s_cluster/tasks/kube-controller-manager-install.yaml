@@ -1,11 +1,13 @@
 ---
 - block:
-    - name: Copy kubeconfig to controller
+    - name: Copy certs and kubeconfig to controller
       copy:
         src: "{{ WORK_DIR }}/{{ item }}"
         dest: "/var/lib/kubernetes"
       loop:
         - kube-controller-manager.kubeconfig
+        - service-account-key.pem
+        - service-account.pem
 
     - name: Download kube-controller-manager binary
       uri:

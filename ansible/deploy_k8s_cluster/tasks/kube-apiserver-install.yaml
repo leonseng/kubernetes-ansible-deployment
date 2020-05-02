@@ -8,8 +8,6 @@
         - encryption-config.yaml
         - kubernetes-key.pem
         - kubernetes.pem
-        - service-account-key.pem
-        - service-account.pem
 
     - name: Create systemd unit for kube-apiserver
       template:
