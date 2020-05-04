@@ -82,6 +82,11 @@
       register: result
       until: (groups['workers'] | length) == (result.stdout | int)
 
+    - name: Label worker roles
+      shell:
+        cmd: kubectl label node {{ item }} kubernetes.io/role=worker
+      loop: "{{ groups['workers'] }}"
+
     - include_tasks: ../tasks/kube-router-install.yaml
 
     - include_tasks: ../tasks/coredns-install.yaml
