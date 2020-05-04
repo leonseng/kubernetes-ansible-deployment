@@ -45,8 +45,3 @@
                 {%- for n in groups['controllers'] %}\
                 ,{{ hostvars[n]['cluster_ip'] }}\
                 {% endfor -%}"
-
-        - include_tasks: "{{ tasks_dir }}/kubeconfig-generate.yaml"
-          vars:
-            name: admin
-            kube_cfg_user: admin
