@@ -1,27 +1,47 @@
 ---
 - block:
-    - name: Set template variables for {{ name }}
-      set_fact:
-        cn: "{{ cn }}"
-        org: "{{ org }}"
+    - name: Check if certs already exist
+      stat:
+        path: "{{ WORK_DIR }}/{{ cert_file }}"
+      register: st
+      loop:
+        - "{{ name }}.pem"
+        - "{{ name }}-key.pem"
+      loop_control:
+        loop_var: cert_file
 
-    - name: Create CSR for {{ name }}
-      template:
-        src: ../templates/csr.json.j2
-        dest: "{{ WORK_DIR }}/{{ name }}-csr.json"
+    - set_fact:
+        certs_exists: "{{ st.results.0.stat.exists and st.results.1.stat.exists }}"
 
-    - name: Generate {{ name }} cert
-      shell:
-        cmd: >
-          cfssl gencert
-          -ca=ca.pem
-          -ca-key=ca-key.pem
-          -config=ca-config.json
-          {% if hostname is defined %}
-          -hostname={{ hostname }}
-          {% endif %}
-          -profile=kubernetes
-          {{ name }}-csr.json | cfssljson -bare {{ name }}
-        chdir: "{{ WORK_DIR }}"
+    - debug:
+        msg: "Certificates for {{ name }} already exists"
+      when: certs_exists
+
+    - name: Create certs if not present
+      block:
+        - name: Set template variables for {{ name }}
+          set_fact:
+            cn: "{{ cn }}"
+            org: "{{ org }}"
+
+        - name: Create CSR for {{ name }}
+          template:
+            src: ../templates/csr.json.j2
+            dest: "{{ WORK_DIR }}/{{ name }}-csr.json"
+
+        - name: Generate {{ name }} cert
+          shell:
+            cmd: >
+              cfssl gencert
+              -ca=ca.pem
+              -ca-key=ca-key.pem
+              -config=ca-config.json
+              {% if hostname is defined %}
+              -hostname={{ hostname }}
+              {% endif %}
+              -profile=kubernetes
+              {{ name }}-csr.json | cfssljson -bare {{ name }}
+            chdir: "{{ WORK_DIR }}"
+      when: not certs_exists
 
   delegate_to: localhost

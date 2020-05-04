@@ -1,31 +1,51 @@
 ---
-- name: Create CA config file
-  copy:
-    content: |
-      {
-        "signing": {
-          "default": {
-            "expiry": "8760h"
-          },
-          "profiles": {
-            "kubernetes": {
-              "usages": ["signing", "key encipherment", "server auth", "client auth"],
-              "expiry": "8760h"
+- name: Check if CA certs already exist
+  stat:
+    path: "{{ WORK_DIR }}/{{ cert_file }}"
+  register: st
+  loop:
+    - ca-key.pem
+    - ca.pem
+  loop_control:
+        loop_var: cert_file
+        
+- set_fact:
+    certs_exists: "{{ st.results.0.stat.exists and st.results.1.stat.exists }}"
+
+- debug:
+    msg: "CA certificates already exists"
+  when: certs_exists
+
+- name: Create certs if not present
+  block:
+    - name: Create CA config file
+      copy:
+        content: |
+          {
+            "signing": {
+              "default": {
+                "expiry": "8760h"
+              },
+              "profiles": {
+                "kubernetes": {
+                  "usages": ["signing", "key encipherment", "server auth", "client auth"],
+                  "expiry": "8760h"
+                }
+              }
             }
           }
-        }
-      }
-    dest: "{{ WORK_DIR }}/ca-config.json"
+        dest: "{{ WORK_DIR }}/ca-config.json"
 
-- name: Create CA CSR file
-  template:
-    src: ../templates/csr.json.j2
-    dest: "{{ WORK_DIR }}/ca-csr.json"
-  vars:
-    cn: "Kubernetes"
-    org: "Kubernetes"
+    - name: Create CA CSR file
+      template:
+        src: ../templates/csr.json.j2
+        dest: "{{ WORK_DIR }}/ca-csr.json"
+      vars:
+        cn: "Kubernetes"
+        org: "Kubernetes"
 
-- name: Provision CA
-  shell:
-    cmd: cfssl gencert -initca ca-csr.json | cfssljson -bare ca
-    chdir: "{{ WORK_DIR }}"
+    - name: Provision CA
+      shell:
+        cmd: cfssl gencert -initca ca-csr.json | cfssljson -bare ca
+        chdir: "{{ WORK_DIR }}"
+  when: not certs_exists
