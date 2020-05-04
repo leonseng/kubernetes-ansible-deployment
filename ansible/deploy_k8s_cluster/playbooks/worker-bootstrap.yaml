@@ -19,8 +19,6 @@
         - ipset
       become: yes
 
-    - include_tasks: "{{ tasks_dir }}/kubectl-install.yaml"
-
     - include_tasks: "{{ tasks_dir }}/container-runtime-install.yaml"
 
     - include_tasks: "{{ tasks_dir }}/cni-install.yaml"
